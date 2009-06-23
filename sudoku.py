@@ -33,14 +33,20 @@ class Sudoku:
         for t,l in zip(total,list):
             if l != '0':
                 self.board[t]=[l]
-                #self.constrain(t,l) # aqui recorrera los vecinos para el CP
+                self.constraint(t,l) # aqui recorrera los vecinos para el CP
             
 
     def constraint(self,index,value):
         list = self.get_neighbor(index)
         list = [x for x in list if x not in locals()['_[1]']] #para elimiar datos repetidos
-
-        print list    
+        #print list
+        list.remove(index)
+        for i in list:
+           # if i != index:
+           if value in self.board[i]:
+               self.board[i].remove(value)
+        
+            
     def get_neighbor(self,index):
         list=[]
         for a in cols:
