@@ -33,16 +33,16 @@ class Sudoku:
         for t,l in zip(total,list):
             if l != '0':
                 self.board[t]=[l]
-                self.constraint(t,l) # aqui recorrera los vecinos para el CP
+                self.delete_option(t,l) # aqui recorrera los vecinos para el CP
             
 
-    def constraint(self,index,value):
+    def delete_option(self,index,value):
         list = self.get_neighbor(index)
-        list = [x for x in list if x not in locals()['_[1]']] #para elimiar datos repetidos
+        
         #print list
-        list.remove(index)
+        
         for i in list:
-           # if i != index:
+          
            if value in self.board[i]:
                self.board[i].remove(value)
         
@@ -50,16 +50,35 @@ class Sudoku:
     def get_neighbor(self,index):
         list=[]
         for a in cols:
-            list.append(index[0]+a)
+            list.append(index[0]+a) #todas las columnas
         for b in rows:
-            list.append(b+index[1])
-        mini_rows , mini_cols = self.mini_board(index)
+            list.append(b+index[1]) #todas las filas
+        mini_rows , mini_cols = self.mini_board(index) #el mini tablero
         for a in mini_rows:
            for b in mini_cols:
             list.append(a+b)
-        
+        list = [x for x in list if x not in locals()['_[1]']] #para elimiar datos repetidos
+        list.remove(index) #yo no soy vecino de yo
         return list
     
+    
+    def constraint(self):
+        ban=True
+        while ban==True:
+            ban=False
+            for a in total:
+                if len(self.board[a]) == 1:
+                    list=self.get_neighbor(a)
+                    value=self.board[a][0]
+                    for i in list:
+                        if value in self.board[i]:
+                            ban=True
+                            
+                            self.board[i].remove(value)
+                            #self.print_board()
+                        
+        
+            
     def mini_board(self,index):
         if index[0] in 'ABC':
             mini_rows='ABC'
