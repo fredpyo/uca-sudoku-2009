@@ -7,4 +7,5 @@ sudo = Sudoku()
 sudo.charge(grid)
 #print sudo.board
 #sudo.print_board()
-sudo.constraint('A7',1)
+sudo.constraint('E1',1)
+sudo.print_board()
