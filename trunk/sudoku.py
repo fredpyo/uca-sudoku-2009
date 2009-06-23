@@ -31,7 +31,7 @@ class Sudoku:
     def charge(self,list):
         list = [c for c in grid if c in '0.-123456789'] # para chupar en \n
         for t,l in zip(total,list):
-            if l != '0':
+            if l != '0' or l != '.':
                 self.board[t]=[l]
                 self.delete_option(t,l) # aqui recorrera los vecinos para el CP
             
