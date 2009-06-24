@@ -15,7 +15,7 @@ def cross(A, B):
     
 class Sudoku:
     board={}
-    
+    fin = False
     def __init__(self):
             for a in rows:
                 for b in cols:
@@ -30,10 +30,13 @@ class Sudoku:
                     
     def charge(self,list):
         list = [c for c in grid if c in '0.-123456789'] # para chupar en \n
+        print list,"\n"
         for t,l in zip(total,list):
-            if l != '0' or l != '.':
+            if l == '0' or l == '.':
+               pass
+            else : 
                 self.board[t]=[l]
-                self.delete_option(t,l) # aqui recorrera los vecinos para el CP
+                #self.delete_option(t,l) 
             
 
     def delete_option(self,index,value):
@@ -75,10 +78,13 @@ class Sudoku:
                             ban=True
                             
                             self.board[i].remove(value)
+                            if len(self.board[i]) == 0:
+                                return False                #bad solution
                             #self.print_board()
+        return True                                         #All constraint checked
                         
-        
-            
+
+                        
     def mini_board(self,index):
         if index[0] in 'ABC':
             mini_rows='ABC'
@@ -95,13 +101,105 @@ class Sudoku:
         return mini_rows ,mini_cols
         
         
+
+
+    def solved(self):
+        for i in total:
+            if len(self.board[i]) > 1 or len(self.board[i]) ==0:
+                return False
+        return True
+    
+    def back_cp(self,rest=[]):
+     if not self.fin:
+        if self.solved():
+            print "ya resolvi"
+            self.print_board()
+            self.fin=True
+            quit()
+            return True
+        else:
+            #for i in total:
+                #if len(self.board[i])>1:
+                    #print "\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+                    #self.print_board()
+                    
+                    i=rest[0]
+                    aux = self.board[i]
+                    #print rest
+                    for j in aux:
+                        
+                        trace=self.check_option(i,j)
+                        if  trace != False:
+                           self.board[i]=[j]
+                           print "\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+                           self.print_board()
+                           rest.pop(0)
+                           if not self.back_cp(rest):
+                               self.rollback(trace, j)  
+                               rest.insert(0,i)
+                               self.board[i]=aux
+                               print "\n7777777777777777777777777"
+                               self.print_board()
+                        #else:
+                                #return False
+                    self.board[i]=aux    
+                    return False 
+                           #break
+                           #print "\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",i
+                           #self.print_board()
+                         
+                           #print "\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",i
+                           #self.back_cp()
+                           #pass
+                        #else:
+                           #self.board[i]=aux
+                           #return   
+                        #print "+++++++++++++++++++++"
+                        #self.print_board()
+                        #break
+                    
+                        
+                #elif len(self.board[i])==0:
+                 #   pass
+                    #return 
+               
+      
+    def check_option(self,index,value):
+        list = self.get_neighbor(index)
+        trace=[]
+        #print list
+        #print 88888888888888888
+        for i in list:
+           
+           if value in self.board[i]:
+               if len(self.board[i])>1:
+              #     print i ,value
+                   self.board[i].remove(value)
+                   trace.append(i)
+               else:
+                   #print trace
+                   for t in trace:
+                       self.board[t].append(value)
+                   return False
+        return trace
+        
+        
+    def rollback(self,trace,value):
+        #list = self.get_neighbor(index)
+        #trace=[]
+        #print list
+        #print 88888888888888888
+        for i in trace:
+           
+          self.board[i].append(value)
+       
 grid = """
-003020600
-900305001
-001806400
-008102900
-700000008
-006708200
-002609500
-800203009
-005010300"""
+200080300
+060070084
+030500209
+000105408
+000000000
+402706000
+301007040
+720040060
+004010003"""
