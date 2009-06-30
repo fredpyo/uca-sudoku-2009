@@ -9,9 +9,10 @@ sudo.charge(grid)
 #sudo.print_board()
 #sudo.constraint('E1',1)
 sudo.print_board()
-sudo.constraint()
+#sudo.constraint()
 print '\n###############################################3\n'
-sudo.print_board()
+sudo.printb()
+#sudo.print_board()
 print '\n#####################fgdfgdgd##########################3\n'
-sudo.back_cp(total)
+#sudo.back_cp(total)
 #sudo.print_board()
