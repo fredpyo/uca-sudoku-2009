@@ -71,7 +71,7 @@ def solve(n):
             nuevos[1].mutar_genes()
             nueva_poblacion.append(nuevos[0])
             nueva_poblacion.append(nuevos[1])
-        nueva_poblacion.extend(pop[0:10])
+        nueva_poblacion.extend(pop[0:POBLACION/2])
         pop = nueva_poblacion
         pop.sort(cmp=lambda x,y: cmp(x.aptitud(), y.aptitud()))
         iteracion += 1
