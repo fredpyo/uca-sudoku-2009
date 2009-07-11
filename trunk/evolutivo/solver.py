@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+﻿# -*- encoding: utf-8 -*-
 '''
 Sudoku Solver
 Resolvedor de Sudoku mediante el uso de Algoritmos Evolutivos
@@ -7,7 +7,7 @@ Autores:
     Federico Caceres
     Sergio Gonzalez
 Materia: Informatica 2
-Universidad Catolica "Nuestra Se�ora de la Asunci�n
+Universidad Catolica "Nuestra Señora de la Asunción
 '''
 
 import re
@@ -17,9 +17,11 @@ import os.path
 from time import time
 from subprocess import Popen
 
-from src.sudoku import SudokuEvo
+from src.sudoku import CromosomaSudoku
 
 PUZZLES_FILE = "puzzles.txt" # archivo con los puzzless
+ITERACION_TOPE = 100
+POBLACION = 44
 
 
 def load_puzzle(n):
@@ -37,8 +39,7 @@ def load_puzzle(n):
             if match and not found and int(match.group(1)) == n:
                 found = True
         f.close()
-        values = "".join(buff).replace("_","").split(",")
-        values.pop()
+        values = "".join(buff).replace("_","").replace(";","").split(",")
         return values
     except Exception, e:
         exit("Error al intentar parsear el archivo de puzzles: %s" % e)
@@ -48,6 +49,35 @@ def solve(n):
     '''Instancia la clase Sudoku, busca el puzzle deseado y se lo pasa a la clase'''
     print "Cargando puzzle %d..." % n
     puzzle = load_puzzle(n)
+    reemplazables = []
+    for i in xrange(len(puzzle)):
+        if puzzle[i] == '':
+            reemplazables.append(i)
+    cromosoma = CromosomaSudoku(puzzle, 0, reemplazables, ['1','2','3','4','5','6','7','8','9'])
+
+    f = open("salida.csv", 'w')
+    f.write("Iteracion;%s;Mejor Generacion\n" % ";".join([str(x+1) for x in range(POBLACION)]))
+
+    pop = cromosoma.generar_poblacion_inicial(POBLACION)
+    pop.sort(cmp=lambda x,y: cmp(x.aptitud(), y.aptitud()))
+    iteracion = 0
+    f.write("%d;%s;%d\n" % (iteracion, ";".join([str(x.aptitud()) for x in pop]), pop[0].generacion))
+    while (pop[0] != 0 and iteracion <= ITERACION_TOPE):
+        print "Generacion", iteracion
+        nueva_poblacion = []
+        for c in xrange(0,POBLACION/2,2):
+            nuevos = pop[c].cruzar(pop[c+1])
+            nuevos[0].mutar_genes()
+            nuevos[1].mutar_genes()
+            nueva_poblacion.append(nuevos[0])
+            nueva_poblacion.append(nuevos[1])
+        nueva_poblacion.extend(pop[0:10])
+        pop = nueva_poblacion
+        pop.sort(cmp=lambda x,y: cmp(x.aptitud(), y.aptitud()))
+        iteracion += 1
+        f.write("%d;%s;%d\n" % (iteracion, ";".join([str(x.aptitud()) for x in pop]), pop[0].generacion))
+        
+    f.close()
 
 # bootstrap
 if __name__ == '__main__':
