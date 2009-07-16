@@ -1,7 +1,5 @@
 ﻿# -*- encoding: utf-8 -*- 
-rows = 'ABCDEFGHI'
-cols = '123456789'
-total = []
+import copy
 
 # CRITERIOS DE ORDENAMIENTO DE OPCIONES (VARIABLES)
 VAR_ORDER_MINIMUN_REMAINING_VALUES = 1
@@ -12,7 +10,9 @@ VAL_ORDER_LEAST_CONFLICTS = 4
 VAL_ORDER_MOST_CONFLICTS = 5
 VAL_ORDER_SECUENTIAL = 6
 
-import copy
+rows = 'ABCDEFGHI'
+cols = '123456789'
+total = []
 
 for a in rows:  #tuve que hacer esto porque cuando hago mi diccionario me carga aleatoriamente o sea no me hace de la A-I
     for b in cols:
@@ -24,12 +24,8 @@ def cross(A, B):
     
 class Sudoku:
     '''Clase sencilla para la implementación del Puzzle Sudoku'''
-    board={}
-    iterations = 0
+    board = {}
     attempts = 0
-    backtracks = 0
-    tt = set()
-    paths = set()
     var_order = VAR_ORDER_SECUENTIAL
     val_order = VAL_ORDER_SECUENTIAL
     
@@ -39,9 +35,9 @@ class Sudoku:
                 self.board[a+b]=['1','2','3','4','5','6','7','8','9']
         if puzzle:
             self.load(puzzle)
-                
             
     def print_board(self):
+        """Imprimir los diccionarios del tablero"""
         for a in rows:
             print "\n"
             for b in cols:
@@ -58,6 +54,7 @@ class Sudoku:
             print " ".join(a + "".join([self.board[a+x][0] if len(self.board[a+x]) == 1 else ' ' for x in cols]))
             
     def printb2(self):
+        """Impresion similar a printb, solo que muestra las opciones por cada casilla, similar a print_board"""
         print "  ",
         for b in cols:
             print b, " " * 7,
@@ -68,6 +65,7 @@ class Sudoku:
         print
         
     def load(self, values):
+        """Cargar datos, llamado por __init__"""
         list = [c for c in values if c in '0.-123456789'] # para chupar en \n
         for t,l in zip(total,list):
             if l not in '0.':
@@ -75,26 +73,14 @@ class Sudoku:
     
     def charge(self,list):
         list = [c for c in grid if c in '0.-123456789'] # para chupar en \n
-        #print list,"\n"
         for t,l in zip(total,list):
             if l == '0' or l == '.':
                pass
             else : 
                 self.board[t]=[l]
-                #self.delete_option(t,l) 
-            
 
-    def delete_option(self,index,value):
-        list = self.get_neighbor(index)
-        
-        #print list
-        
-        for i in list:
-          
-           if value in self.board[i]:
-               self.board[i].remove(value)
-        
     def get_neighbor(self,index):
+        """Retornar los vecinos de una casilla"""
         list=[]
         for a in cols:
             list.append(index[0]+a) #todas las columnas
@@ -109,9 +95,8 @@ class Sudoku:
         return list
         
     def constraint(self):
-        self.iterations = self.iterations + 1
+        """Propagación de restricciones"""
         ban=True
-        constrained = 0
         while ban==True:
             ban=False
             for a in total:
@@ -120,17 +105,14 @@ class Sudoku:
                     value=self.board[a][0]
                     for i in list:
                         if value in self.board[i]:
-                            constrained += 1
                             ban=True
                             self.board[i].remove(value)
                             if len(self.board[i]) == 0:
                                 return False                #bad solution
-                            #self.print_board()
-        #print "Constrained", constrained
         return True                                         #All constraint checked
                         
-                        
     def mini_board(self,index):
+        """Retornar la región correspondiente a una casilla"""
         if index[0] in 'ABC':
             mini_rows='ABC'
         elif index[0] in 'DEF':
@@ -146,6 +128,7 @@ class Sudoku:
         return mini_rows ,mini_cols
 
     def solved(self):
+        """Verificar si el tablero está resuelto"""
         for i in total:
             if len(self.board[i]) != 1:
                 return False
@@ -163,7 +146,6 @@ class Sudoku:
         """Ordena las variables del problema (las casillas) segun un criterio"""
         new_rest = copy.copy(rest)
         if self.var_order == VAR_ORDER_MINIMUN_REMAINING_VALUES:
-            # MRV
             new_rest.sort(cmp=lambda x,y: cmp(len(self.board[x]), len(self.board[y])), reverse=False)
         elif self.var_order == VAR_ORDER_MAXIMUM_REMAINING_VALUES:
             new_rest.sort(cmp=lambda x,y: cmp(len(self.board[x]), len(self.board[y])), reverse=True)
@@ -183,17 +165,15 @@ class Sudoku:
         return new_values
     
     def back_cp(self,rest=total):
+        """Backtracking en toda su gloria"""
         self.attempts += 1
         if rest == None:
             rest = total
         if not self.silencioso and self.attempts % 1000:
             print "·",
-        #print self.attempts, "-" * len(rest)
         if self.solved():
-            #print "ya resolvi"
             return True
         else:
-            # seleccionar bien :D
             rest = self.order_rest(rest)
             i=rest[0]
             aux = self.order_vales(i)
@@ -212,6 +192,7 @@ class Sudoku:
             return False 
       
     def check_option(self,index,value):
+        """Selecciona un valor para un indice y ademas realiza *forward checking*"""
         list = self.get_neighbor(index)
         trace=[]
         for i in list:
@@ -226,8 +207,10 @@ class Sudoku:
         return trace
         
     def rollback(self,trace,value):
+        """Deshacer un cambio"""
         for i in trace:
           self.board[i].append(value)
+
        
 grid = """
 200080300
@@ -239,6 +222,7 @@ grid = """
 301007040
 720040060
 004010003"""
+
 
 if __name__ == "__main__":
     print "Para ejecutar el resolvedor de sudokus ejecutar el script solver.py"
