@@ -3,6 +3,12 @@ rows = 'ABCDEFGHI'
 cols = '123456789'
 total = []
 
+# CRITERIOS DE ORDENAMIENTO DE OPCIONES
+ORDEN_MENOR_CANTIDAD_DE_CONFLICTOS = 1
+ORDEN_MENOR_CANTIDAD_DE_OPCIONES = 2
+ORDEN_MAYOR_CANTIDAD_DE_OPCIONES = 3
+ORDEN_SECUENCIAL = 4
+
 import copy
 
 for a in rows:  #tuve que hacer esto porque cuando hago mi diccionario me carga aleatoriamente o sea no me hace de la A-I
@@ -15,13 +21,13 @@ def cross(A, B):
     
 class Sudoku:
     '''Clase sencilla para la implementación del Puzzle Sudoku'''
-    
     board={}
     iterations = 0
     attempts = 0
     backtracks = 0
     tt = set()
     paths = set()
+    order = ORDEN_MENOR_CANTIDAD_DE_OPCIONES
     
     def __init__(self, puzzle=None):
         for a in rows:
@@ -63,22 +69,6 @@ class Sudoku:
             if l not in '0.':
                 self.board[t]=[l]
     
-    def count_combinations(self):
-        i = 0
-        for a in rows:
-            for b in cols:
-                if len(self.board[a+b]) > 1:
-                    i += len(self.board[a+b])
-        return i
-        
-    def count_free(self):
-        i = 0
-        for a in rows:
-            for b in cols:
-                if len(self.board[a+b]) > 1:
-                    i += 1
-        return i
-    
     def charge(self,list):
         list = [c for c in grid if c in '0.-123456789'] # para chupar en \n
         #print list,"\n"
@@ -100,24 +90,6 @@ class Sudoku:
            if value in self.board[i]:
                self.board[i].remove(value)
         
-            
-    def get_neighbours(self, index):
-        neighbours = set()
-        for a in cols:
-            #print index[0]+a
-            neighbours.add(index[0]+a) #todas las columnas
-        for b in rows:
-            #print b+index[1]
-            neighbours.add(b+index[1]) #todas las filas
-        mini_rows , mini_cols = self.mini_board(index) #el mini tablero
-        #print mini_rows
-        #print mini_cols
-        for a in mini_rows:
-           for b in mini_cols:
-            neighbours.add(a+b)
-        neighbours.remove(index)
-        return list(neighbours)
-    
     def get_neighbor(self,index):
         list=[]
         for a in cols:
@@ -132,31 +104,6 @@ class Sudoku:
         list.remove(index) #yo no soy vecino de yo
         return list
         
-        
-    def choose_next(self):
-        '''Elije la siguiente casilla con menos opciones'''
-        rank = ["", 10]
-        for a in total:
-            choices_left = len(self.board[a])
-            if choices_left < rank[1]:
-                rank[0] = a
-                rank[1] = choices_left
-        return rank[0]
-    
-    def rank_next(self):
-        '''Elije la siguiente casilla con menos opciones'''
-        rank = []
-        for a in total:
-            choices_left = len(self.board[a])
-            if choices_left > 1:
-                rank.append((a, choices_left))
-        #rank.sort(cmp=lambda x,y:cmp(x[0],y[0]))
-        rank1 = list(rank)
-        rank.sort(key=lambda x:x[1], reverse=True)
-        
-        #print ">>", rank
-        return rank
-    
     def constraint(self):
         self.iterations = self.iterations + 1
         ban=True
@@ -200,104 +147,17 @@ class Sudoku:
                 return False
         return True
     
-    def set_value(self, index, value):
-        '''Setea el valor de una celda y elimina esa opcion de sus vecinos'''
-        old_values = self.board[index]
-        conflicting_neighbours = []
-        self.board[index] = [value]
-        for n in self.get_neighbours(index):
-            try:
-                self.board[n].remove(value)
-            except Exception, e:
-                pass
-            else:
-                if len(self.board[n]) == 0:
-                    self.board[n].append(value)
-                    for x in conflicting_neighbours:
-                        self.board[x].append(value)
-                    self.board[index] = old_values
-                    return False
-                conflicting_neighbours.append(n)
-        return (old_values, conflicting_neighbours)
-    
-    def rb(self, index, value, old_values, conflicted):
-        #print "UNSETTING %s for %s" % (value, index)
-        if "A9" in conflicted:
-            print "////", conflicted, value
-        for n in conflicted:
-            self.board[n].append(value)
-            if "A9" == n:
-                print ">>>>", self.board[n]
-        self.board[index] = old_values
-    
-    def dead_end(self):
-        for a in total:
-            if len(self.board[a]) == 0:
-                #print a, self.board[a]
-                return True
-            if len(self.board[a]) == 1:
-                for b in self.get_neighbours(a):
-                    if len(self.board[b]) == 1 and self.board[b][0] == self.board[a][0]:
-                        #print b, self.board[a][0], self.board[b][0]
-                        return True
-        return False
-    
-    def backtracking(self, path=[]):
-        #print "BACKTRACKING !!!! %s" % str(path)
-        #print "Attempt :", self.attempts
-        #print 
-        self.attempts += 1
-        print self.attempts
-        if self.dead_end():
-            #print "DEAD END!"
-            return False
-        if len(path) > 81:
-            exit("WOOPS!")
-        if self.solved():
-            print "YAY!"
-            return True
-        else:
-            #old_state = copy.deepcopy(self.board)
-            #self.constraint()
-            if self.solved():
-                print "YAY2"
-                return True
-            else:
-                next_indexes = self.rank_next()
-                for next in next_indexes:
-                    for value in self.board[next[0]]:
-                        path.append((next[0], value))
-                        pp = "/".join(["%s:%s" % (i, v) for i, v in path])
-                        #print "PATH: ", pp
-                        self.paths.add(pp)
-                        # old_values, conflicted
-                        setted = self.set_value(next[0], value)
-                        print "~" * (self.count_free())
-                        print len(self.paths)
-                        print len(path)
-                        
-                        #print setted
-                        #print setted
-                        # si set_value retorno False, saltar este valor porque genera dead ends
-                        if not setted:
-                            path.pop()
-                            continue
-                            
-                        #print "DIFF PATHS:", len(self.paths)
-                        #raw_input()
-                        if self.backtracking(list(path)):
-                            return True
-                        else:
-                            #raw_input()
-                            #print "go back...", self.board["A9"]
-                            self.rb(path[-1][0], value, setted[0], setted[1])
-                            #print path
-                            path.pop()
-                            #print path
-                #self.state = old_state
-                return False
-                        
-            
+    def ordenar_restantes(self, rest):
+        new_rest = copy.copy(rest)
+        if self.order == ORDEN_MENOR_CANTIDAD_DE_OPCIONES:
+            new_rest.sort(cmp=lambda x,y: cmp(len(self.board[x]), len(self.board[y])), reverse=False)
+        elif self.order == ORDEN_MAYOR_CANTIDAD_DE_OPCIONES:
+            new_rest.sort(cmp=lambda x,y: cmp(len(self.board[x]), len(self.board[y])), reverse=True)
+        elif self.order == ORDEN_MENOR_CANTIDAD_DE_CONFLICTOS:
+            pass
+        elif self.order == ORDEN_SECUENCIAL:
+            pass
+        return new_rest
     
     def back_cp(self,rest=total):
         self.attempts += 1
@@ -310,6 +170,8 @@ class Sudoku:
             #print "ya resolvi"
             return True
         else:
+            # seleccionar bien :D
+            rest = self.ordenar_restantes(rest)
             i=rest[0]
             aux = self.board[i]
             for j in aux:

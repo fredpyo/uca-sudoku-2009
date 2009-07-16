@@ -19,7 +19,8 @@ from time import time
 from subprocess import Popen
 import datetime
 
-from sudoku import Sudoku
+from sudoku import Sudoku, ORDEN_MENOR_CANTIDAD_DE_CONFLICTOS, ORDEN_MENOR_CANTIDAD_DE_OPCIONES, ORDEN_MAYOR_CANTIDAD_DE_OPCIONES, ORDEN_SECUENCIAL
+
 
 PUZZLES_FILE = "puzzles.txt" # archivo con los puzzless
 HARD_PUZZLES_FILE = "puzzles-hard.txt" # archivo con los puzzless
@@ -50,7 +51,7 @@ def load_puzzle(n):
             exit("Error al intentar parsear el archivo de puzzles: %s" % e)
 
 def load_puzzle_hard(n):
-    '''Lee el puzzle n del archivo de puzzles'''
+    '''Lee el puzzle n del archivo de puzzles hadr top 95'''
     try:
         f = open(HARD_PUZZLES_FILE, 'r')
         lines = f.readlines()
@@ -66,6 +67,7 @@ def solve(n):
     puzzle = load_puzzle(n)
     sudo = Sudoku(puzzle)
     sudo.silencioso = MODO_SILENCIOSO
+    sudo.order = ORDEN_SECUENCIAL
     if not MODO_SILENCIOSO:
         sudo.printb()
     inicio = datetime.datetime.now()
@@ -74,7 +76,6 @@ def solve(n):
     transcurrido = datetime.datetime.now() - inicio
     if not MODO_SILENCIOSO:
         print "*"
-    if not MODO_SILENCIOSO:
         sudo.printb()
     if resuelto:
         if not MODO_SILENCIOSO:
@@ -84,28 +85,6 @@ def solve(n):
     else:
         if not MODO_SILENCIOSO:
             print "El tablero no se pudo resolver"
-    #sudo.printb()
-    """
-    x = sudo.get_neighbours("C7")
-    x.sort()
-    sudo.printb()
-    print x
-    exit()"""
-    """print "Situación inicial:"
-    sudo.constraint()
-    sudo.printb()
-    sudo.printb2()
-    print "Combinaciones posibles: ", sudo.count_combinations()
-    print "Celdas disponibles: ", sudo.count_free()
-    raw_input()
-    print "Intentando resolver puzzle..."
-    #sudo.back_cp()
-    sudo.backtracking()
-    print sudo.attempts
-    sudo.printb()
-    sudo.printb2()
-    print sudo.iterations"""
-    
 
 
 # bloque principal de codigo
