@@ -3,11 +3,14 @@ rows = 'ABCDEFGHI'
 cols = '123456789'
 total = []
 
-# CRITERIOS DE ORDENAMIENTO DE OPCIONES
-ORDEN_MENOR_CANTIDAD_DE_CONFLICTOS = 1
-ORDEN_MENOR_CANTIDAD_DE_OPCIONES = 2
-ORDEN_MAYOR_CANTIDAD_DE_OPCIONES = 3
-ORDEN_SECUENCIAL = 4
+# CRITERIOS DE ORDENAMIENTO DE OPCIONES (VARIABLES)
+VAR_ORDER_MINIMUN_REMAINING_VALUES = 1
+VAR_ORDER_MAXIMUM_REMAINING_VALUES = 2
+VAR_ORDER_SECUENTIAL = 3
+# CRITERIOS DE ORDENAMIENTO DE VALORES
+VAL_ORDER_LEAST_CONFLICTS = 4
+VAL_ORDER_MOST_CONFLICTS = 5
+VAL_ORDER_SECUENTIAL = 6
 
 import copy
 
@@ -27,7 +30,8 @@ class Sudoku:
     backtracks = 0
     tt = set()
     paths = set()
-    order = ORDEN_MENOR_CANTIDAD_DE_OPCIONES
+    var_order = VAR_ORDER_SECUENTIAL
+    val_order = VAL_ORDER_SECUENTIAL
     
     def __init__(self, puzzle=None):
         for a in rows:
@@ -146,18 +150,37 @@ class Sudoku:
             if len(self.board[i]) != 1:
                 return False
         return True
+
+    def count_conflicts(self, index, value):
+        """Cuenta cuantos conflictos tiene este valor en este indice"""
+        neigh = self.get_neighbor(index)
+        conflicts = 0
+        for n in neigh:
+            conflicts += n.count(value)
+        return conflicts
     
-    def ordenar_restantes(self, rest):
+    def order_rest(self, rest):
+        """Ordena las variables del problema (las casillas) segun un criterio"""
         new_rest = copy.copy(rest)
-        if self.order == ORDEN_MENOR_CANTIDAD_DE_OPCIONES:
+        if self.var_order == VAR_ORDER_MINIMUN_REMAINING_VALUES:
+            # MRV
             new_rest.sort(cmp=lambda x,y: cmp(len(self.board[x]), len(self.board[y])), reverse=False)
-        elif self.order == ORDEN_MAYOR_CANTIDAD_DE_OPCIONES:
+        elif self.var_order == VAR_ORDER_MAXIMUM_REMAINING_VALUES:
             new_rest.sort(cmp=lambda x,y: cmp(len(self.board[x]), len(self.board[y])), reverse=True)
-        elif self.order == ORDEN_MENOR_CANTIDAD_DE_CONFLICTOS:
-            pass
-        elif self.order == ORDEN_SECUENCIAL:
+        elif self.var_order == VAR_ORDER_SECUENTIAL:
             pass
         return new_rest
+
+    def order_vales(self, index):
+        """Recibe una posición y retorna los valores de esa posicion ordenados según un criterio"""
+        new_values = copy.copy(self.board[index])
+        if self.val_order == VAL_ORDER_LEAST_CONFLICTS:
+            new_values.sort(cmp=lambda x,y: cmp(self.count_conflicts(index, x), self.count_conflicts(index,y)), reverse=False)
+        elif self.val_order == VAL_ORDER_MOST_CONFLICTS:
+            new_values.sort(cmp=lambda x,y: cmp(self.count_conflicts(index, x), self.count_conflicts(index,y)), reverse=True)
+        elif self.val_order == VAL_ORDER_SECUENTIAL:
+            pass
+        return new_values
     
     def back_cp(self,rest=total):
         self.attempts += 1
@@ -171,9 +194,9 @@ class Sudoku:
             return True
         else:
             # seleccionar bien :D
-            rest = self.ordenar_restantes(rest)
+            rest = self.order_rest(rest)
             i=rest[0]
-            aux = self.board[i]
+            aux = self.order_vales(i)
             for j in aux:
                 trace=self.check_option(i,j)
                 if  trace != False:
