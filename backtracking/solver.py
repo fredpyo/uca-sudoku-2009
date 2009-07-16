@@ -16,10 +16,11 @@ import os
 import sys
 import os.path
 from time import time
-from subprocess import Popen
 import datetime
 
-from sudoku import Sudoku, ORDEN_MENOR_CANTIDAD_DE_CONFLICTOS, ORDEN_MENOR_CANTIDAD_DE_OPCIONES, ORDEN_MAYOR_CANTIDAD_DE_OPCIONES, ORDEN_SECUENCIAL
+from sudoku import Sudoku
+from sudoku import VAR_ORDER_MINIMUN_REMAINING_VALUES, VAR_ORDER_MAXIMUM_REMAINING_VALUES, VAR_ORDER_SECUENTIAL 
+from sudoku import VAL_ORDER_LEAST_CONFLICTS, VAL_ORDER_MOST_CONFLICTS, VAL_ORDER_SECUENTIAL
 
 
 PUZZLES_FILE = "puzzles.txt" # archivo con los puzzless
@@ -67,7 +68,8 @@ def solve(n):
     puzzle = load_puzzle(n)
     sudo = Sudoku(puzzle)
     sudo.silencioso = MODO_SILENCIOSO
-    sudo.order = ORDEN_SECUENCIAL
+    sudo.var_order = VAR_ORDER_SECUENTIAL
+    sudo.val_order = VAL_ORDER_SECUENTIAL
     if not MODO_SILENCIOSO:
         sudo.printb()
     inicio = datetime.datetime.now()
