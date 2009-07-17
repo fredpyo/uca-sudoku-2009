@@ -55,15 +55,12 @@ def solve(n):
             reemplazables.append(i)
     cromosoma = CromosomaSudoku(puzzle, 0, reemplazables, ['1','2','3','4','5','6','7','8','9'])
 
-    f = open("salida.csv", 'w')
-    f.write("Iteracion;%s;Mejor Generacion\n" % ";".join([str(x+1) for x in range(POBLACION)]))
-
     pop = cromosoma.generar_poblacion_inicial(POBLACION)
     pop.sort(cmp=lambda x,y: cmp(x.aptitud(), y.aptitud()))
     iteracion = 0
-    f.write("%d;%s;%d\n" % (iteracion, ";".join([str(x.aptitud()) for x in pop]), pop[0].generacion))
+    print "Generacion;poblacion...;mejor generacion"
+    print "%d;%s;%d" % (iteracion, ";".join([str(x.aptitud()) for x in pop]), pop[0].generacion)
     while (pop[0] != 0 and iteracion <= ITERACION_TOPE):
-        print "Generacion", iteracion
         nueva_poblacion = []
         for c in xrange(0,POBLACION/2,2):
             nuevos = pop[c].cruzar(pop[c+1])
@@ -75,7 +72,7 @@ def solve(n):
         pop = nueva_poblacion
         pop.sort(cmp=lambda x,y: cmp(x.aptitud(), y.aptitud()))
         iteracion += 1
-        f.write("%d;%s;%d\n" % (iteracion, ";".join([str(x.aptitud()) for x in pop]), pop[0].generacion))
+        print "%d;%s;%d" % (iteracion, ";".join([str(x.aptitud()) for x in pop]), pop[0].generacion)
         
     f.close()
 
