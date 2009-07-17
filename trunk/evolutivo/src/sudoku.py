@@ -2,7 +2,7 @@
 '''
 Implementacion de las clases para Algoritmos Evolutivos para resolver el problema Sudoku
 
-@author: Federico Cáceres <fede.caceres@gmail.com>
+@author: Federico CÃ¡ceres <fede.caceres@gmail.com>
 '''
 
 import random
@@ -15,8 +15,8 @@ class SudokuEvo(object):
 class CromosomaSudoku(Cromosoma):
     """Implementacion del cromosoma especifico para el problema Sudoku"""
     
-    def __init__(self, genes, generacion=0, genes_reemplazables=None, valores_para_los_genes=None):
-        super(CromosomaSudoku, self).__init__(genes, generacion, genes_reemplazables, valores_para_los_genes)    
+    def __init__(self, genes, generacion=0, genes_reemplazables=None, valores_para_los_genes=None, cruzamiento=1):
+        super(CromosomaSudoku, self).__init__(genes, generacion, genes_reemplazables, valores_para_los_genes, cruzamiento)    
         #Cromosoma.__init__(self, genes, generacion, genes_reemplazables, valores_para_los_genes)    
     
     def get_fila(self, fila):
@@ -48,7 +48,7 @@ class CromosomaSudoku(Cromosoma):
     def aptitud(self):
         """
         Aptitud de este cromosoma
-        Método utilizado: Se cuentan las colisiones y se retorna eso como aptutid
+        MÃ©todo utilizado: Se cuentan las colisiones y se retorna eso como aptutid
         0 colisiones = solucion (obvio)
         """
         colisiones = 0
@@ -73,14 +73,34 @@ class CromosomaSudoku(Cromosoma):
         """Funcion tonta para combinar los genes, aleatoriamente"""
         combinacion1 = []
         combinacion2 = []
+        if self.cruzamiento == 1:
+            # combinar aleatoriamente
+            for i in xrange(81):
+                        if random.randint(0,1):
+                            combinacion1.append(genes1[i])
+                            combinacion2.append(genes2[i])
+                        else:
+                            combinacion1.append(genes2[i])
+                            combinacion2.append(genes1[i])
+        elif self.cruzamiento == 2:
+            # combinar por cortes azarosos
+            i = random.randint(0,80)
+            combinacion1.extend(genes1[0:i])
+            combinacion1.extend(genes2[i:81])
+            combinacion2.extend(genes2[0:i])
+            combinacion2.extend(genes1[i:81])
+        elif self.cruzamiento == 3:
+            # combinar por fila
+            for i in xrange(9):
+                if random.randint(0,1):
+                    combinacion1.extend(genes1[i:i+9])
+                    combinacion2.extend(genes2[i:i+9])
+                else:
+                    combinacion1.extend(genes2[i:i+9])
+                    combinacion2.extend(genes1[i:i+9])
+            pass
         # BINOMIAL PURO
-        for i in xrange(81):
-            if random.randint(0,1):
-                combinacion1.append(genes1[i])
-                combinacion2.append(genes2[i])
-            else:
-                combinacion1.append(genes2[i])
-                combinacion2.append(genes1[i])
+        
         return (convertir(combinacion1, type(self.genes)), convertir(combinacion2, type(self.genes)))
     
     def mutar_genes(self):
