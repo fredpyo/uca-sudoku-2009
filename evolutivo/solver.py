@@ -15,13 +15,13 @@ import os
 import sys
 import os.path
 from time import time
-from subprocess import Popen
 
 from src.sudoku import CromosomaSudoku
 
 PUZZLES_FILE = "puzzles.txt" # archivo con los puzzless
 ITERACION_TOPE = 100
 POBLACION = 44
+CRUZAMIENTO = 1
 
 
 def load_puzzle(n):
@@ -53,14 +53,15 @@ def solve(n):
     for i in xrange(len(puzzle)):
         if puzzle[i] == '':
             reemplazables.append(i)
-    cromosoma = CromosomaSudoku(puzzle, 0, reemplazables, ['1','2','3','4','5','6','7','8','9'])
+    cromosoma = CromosomaSudoku(puzzle, 0, reemplazables, ['1','2','3','4','5','6','7','8','9'],CRUZAMIENTO)
 
     pop = cromosoma.generar_poblacion_inicial(POBLACION)
     pop.sort(cmp=lambda x,y: cmp(x.aptitud(), y.aptitud()))
-    iteracion = 0
+    iteracion = 1
     print "Generacion;poblacion...;mejor generacion"
     print "%d;%s;%d" % (iteracion, ";".join([str(x.aptitud()) for x in pop]), pop[0].generacion)
-    while (pop[0] != 0 and iteracion <= ITERACION_TOPE):
+    while (pop[0].aptitud() != 0 and iteracion <= ITERACION_TOPE):
+        CromosomaSudoku.generaciones = iteracion
         nueva_poblacion = []
         for c in xrange(0,POBLACION/2,2):
             nuevos = pop[c].cruzar(pop[c+1])
@@ -74,7 +75,10 @@ def solve(n):
         iteracion += 1
         print "%d;%s;%d" % (iteracion, ";".join([str(x.aptitud()) for x in pop]), pop[0].generacion)
         
-    f.close()
+    if pop[0].aptitud() == 0:
+        print "SOLUCION:"
+        print pop[0].generacion
+        print pop[0].tablero()
 
 # bootstrap
 if __name__ == '__main__':
@@ -89,21 +93,58 @@ if __name__ == '__main__':
         if args[1] == '--help':
             print 'Modo de ejecucion:'
             print '\t' + a + ' --help:  Esta ayuda'
-            print '\t' + a + ' [puzzle]: Resolver un puzzle'
+            print '\t' + a + ' [puzzle] [poblacion [generaciones [tipo_cruzamiento]]]: Resolver un puzzle'
             print
             print '  puzzle: un valor del 1 al 100 donde las dificultades son las siguientes'
-            print '    1 al 20   muy facil\n'
-            print '    21 al 40  facil\n'
-            print '    41 al 60  medio\n'
-            print '    61 al 80  dificil\n'
-            print '    80 al 100  muy dificil\n'
+            print '    1 al 20   muy facil'
+            print '    21 al 40  facil'
+            print '    41 al 60  medio'
+            print '    61 al 80  dificil'
+            print '    80 al 100  muy dificil'
+            print '  poblacion: numero entero con la poblacion a generar'
+            print '  generaciones: numero entero con la cantidad de generaciones a cruzar'
+            print '  tipo_cruzamiento: uno de los siguientes valores'
+            print '    aleatorio: selecciona los genes a cruzarse al azar'
+            print '    corte: parte cada cromosoma al azar (dos grupos de genes)'
+            print '    fila:  cruza las filas dejandolas intactas'
         else:
+            # puzzle
             try:
                 n = int(args[1])
             except:
                 exit("Especifico un numero de puzzle incorrecto, no se pudo interpretar como numero")
+
+            # poblacion
+            try:
+                POBLACION = int(args[2])
+            except ValueError:
+                exit("%s no es un valor valido para la poblacion" % args[2])
+            except:
+                pass
+            
+            # iteraciones
+            try:
+                ITERACION_TOPE = int(args[3])
+            except ValueError:
+                exit("%s no es un valor valido para la cantidad de iteraciones" % args[3])
+            except:
+                pass
+            
+            # cruzamiento
+            try:
+                if args[4] == 'aleatorio':
+                    CRUZAMIENTO = 1
+                elif args[4] == 'corte':
+                    CRUZAMIENTO = 2
+                elif args[4] == 'fila':
+                    CRUZAMIENTO = 3
+                print args[4]
+                    
+                ITERACION_TOP = int(args[3])
+            except:
+                pass
+            
+            if 1 <= n <= 100:
+                solve(n)
             else:
-                if 1 <= n <= 100:
-                    solve(n)
-                else:
-                    exit("El numero esta fuera de rango, elija uno entre 1 y 100")
+                exit("El numero esta fuera de rango, elija uno entre 1 y 100")

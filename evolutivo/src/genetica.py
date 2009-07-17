@@ -44,8 +44,12 @@ class Cromosoma(object):
     - combinar_genes
     - mutar_genes
     """
+
+    # contador globar de generaciones transcurridas, es compartida por todas las instancas (inclusive las que heredan de Cromosoma)
+    # mediante self.__class__.generaciones
+    generaciones = 0
     
-    def __init__(self, genes, generacion=0, genes_reemplazables=None, valores_para_los_genes=None):
+    def __init__(self, genes, generacion=0, genes_reemplazables=None, valores_para_los_genes=None, cruzamiento=1):
         """
         Inicializa el cromosoma
         @param genes: una variable iterable (string, tuple, list, etc) con los genes del cromosoma
@@ -66,15 +70,16 @@ class Cromosoma(object):
         self.generacion = generacion
         self.genes_reemplazables = genes_reemplazables
         self.valores_para_los_genes = valores_para_los_genes
+        self.cruzamiento = cruzamiento
     
     @classmethod
-    def new_Cromosoma(cls, genes, generacion=0, genes_reemplazables=None, valores_para_los_genes=None):
+    def new_Cromosoma(cls, genes, generacion=0, genes_reemplazables=None, valores_para_los_genes=None, cruzamiento = 1):
         """
         Glorioso uso de los classmethods para la generacion de instancias indicadas...
         Explicacion: si un objeto hereda a esta clase, cls tiene como valor a esa clase y no a esta clase padre, entonces
         efectivamente se crea una nueva instancia de la clase desde la cual se ejecuta la funcion, FANTASTICO!!!
         """
-        return cls(genes, generacion, genes_reemplazables, valores_para_los_genes)
+        return cls(genes, generacion, genes_reemplazables, valores_para_los_genes, cruzamiento)
     
     def llenar_genes_vacios(self, genes):
         """Llena los genes vacios aleatoriamente"""
@@ -93,7 +98,7 @@ class Cromosoma(object):
         for i in xrange(cantidad):
             genes = copy.copy(self.genes)
             genes = self.llenar_genes_vacios(genes)
-            nuevo_cromosoma = self.new_Cromosoma(genes, self.generacion+1, self.genes_reemplazables, self.valores_para_los_genes)
+            nuevo_cromosoma = self.new_Cromosoma(genes, self.__class__.generaciones+1, self.genes_reemplazables, self.valores_para_los_genes, self.cruzamiento)
             cromosomas.append(nuevo_cromosoma)
         return cromosomas
         
@@ -117,8 +122,8 @@ class Cromosoma(object):
         mis_genes = self.genes
         sus_genes = cromosoma.genes
         nuevos_genes = self.combinar_genes(mis_genes, sus_genes)
-        nuevo_cromosoma1 = self.new_Cromosoma(nuevos_genes[0], self.generacion + 1, self.genes_reemplazables, self.valores_para_los_genes)
-        nuevo_cromosoma2 = self.new_Cromosoma(nuevos_genes[1], self.generacion + 1, self.genes_reemplazables, self.valores_para_los_genes)
+        nuevo_cromosoma1 = self.new_Cromosoma(nuevos_genes[0], self.__class__.generaciones + 1, self.genes_reemplazables, self.valores_para_los_genes, self.cruzamiento)
+        nuevo_cromosoma2 = self.new_Cromosoma(nuevos_genes[1], self.__class__.generaciones + 1, self.genes_reemplazables, self.valores_para_los_genes, self.cruzamiento)
         return (nuevo_cromosoma1,nuevo_cromosoma2)
     
     def mutar_genes(self):
