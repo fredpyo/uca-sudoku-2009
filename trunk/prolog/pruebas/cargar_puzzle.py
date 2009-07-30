@@ -5,6 +5,7 @@ import sys
 import os.path
 
 PUZZLES_FILE = "puzzles.txt"
+TRACKS_FILE = "pistas.pl" # grande Fede
 
 def load_puzzle(n):
     '''Lee el puzzle n del archivo de puzzles'''
@@ -41,13 +42,19 @@ if __name__ == '__main__':
             n = int(args[1])
         except:
             exit("Especifico un numero de puzzle incorrecto, no se pudo interpretar como numero")
+
+    try: # mira que robo :D
+        f = open(TRACKS_FILE, 'w')
+    except Exception, e:
+        exit("Error al intentar abrir el archivo de pistas: %s" % e)	
+
     puzzle = load_puzzle(n)
     # imprime puzzle(x,y,p) donde x=[1-9],y=[1-9],p=[1-9]
     x = 1
     y = 1
     for p in puzzle:
         if p: # no imprimir los espacios vacios
-            print "pista(%d,%d,%s)" % (x, y, p)
+            f.write("pista(%d,%d,%s).\n" % (x, y, p))
         x = x + 1
         if x > 9:
             x = 1
