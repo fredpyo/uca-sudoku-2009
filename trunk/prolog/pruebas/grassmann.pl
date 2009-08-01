@@ -14,6 +14,6 @@ longitud([_ | Cola], Longitud) :- longitud(Cola, ColaN), Longitud is 1 + ColaN.
 
 
 % procedimiento "anhadir"
-anhadir([], Bs, Cs).
-anhadir([A | ColaAs], Bs, [As | ColaCs]) :- anhadir(ColaAs, Bs, ColaCs).
+anhadir([], B, B).
+anhadir([A | ColaA], B, [A | ColaC]) :- anhadir(ColaA, B, ColaC).
 
