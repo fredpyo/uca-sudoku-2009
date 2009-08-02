@@ -1,3 +1,8 @@
+
+% Consultamos primero la base de datos - 1 punto
+:- consult('pistas.pl').
+
+
 % pagina 204, predicados recursivos que contienen listas
 
 % procedimiento "miembro"
@@ -14,6 +19,12 @@ longitud([_ | Cola], Longitud) :- longitud(Cola, ColaN), Longitud is 1 + ColaN.
 
 
 % procedimiento "anhadir"
+% no se si vamos a usar este procedimiento amigos.
 anhadir([], B, B).
 anhadir([A | ColaA], B, [A | ColaC]) :- anhadir(ColaA, B, ColaC).
+
+
+% by Sergio
+cargartablerosudoku
+cargartablerosudoku([_|ColaTablero]) :- anhadir(_, pista(X, Y, Z), ColaTablero).
 
